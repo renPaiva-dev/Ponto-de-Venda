@@ -1,6 +1,7 @@
 package com.renato.service;
 
 
+import com.renato.domain.StoreStatus;
 import com.renato.exceptons.UserException;
 import com.renato.model.Store;
 import com.renato.model.User;
@@ -19,4 +20,7 @@ public interface StoreService {
     StoreDTO updateStore(Long id, StoreDTO storeDTO) throws Exception;
     void deleteStore(Long id) throws UserException;
     StoreDTO getStoreByEmployee() throws UserException;
+
+
+    StoreDTO moderateStore(Long id, StoreStatus status) throws Exception;
 }

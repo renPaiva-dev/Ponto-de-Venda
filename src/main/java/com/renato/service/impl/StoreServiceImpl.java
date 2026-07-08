@@ -1,5 +1,6 @@
 package com.renato.service.impl;
 
+import com.renato.domain.StoreStatus;
 import com.renato.exceptons.UserException;
 import com.renato.mapper.StoreMapper;
 import com.renato.model.Store;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.renato.mapper.StoreMapper.toDTO;
+
 @Service
 @RequiredArgsConstructor
 
@@ -27,7 +30,7 @@ public class StoreServiceImpl implements StoreService {
 
         Store store = StoreMapper.toEntity(storeDTO, user);
 
-        return StoreMapper.toDTO(storeRepository.save(store));
+        return toDTO(storeRepository.save(store));
     }
 
 
@@ -36,7 +39,7 @@ public class StoreServiceImpl implements StoreService {
         Store store = storeRepository.findById(id).orElseThrow(
                 ()-> new Exception("Store not found...")
         );
-        return StoreMapper.toDTO(store);
+        return toDTO(store);
     }
 
     @Override
@@ -78,7 +81,7 @@ public class StoreServiceImpl implements StoreService {
             existing.setContact(contact);
         }
         Store updatedStore=storeRepository.save(existing);
-        return StoreMapper.toDTO(updatedStore);
+        return toDTO(updatedStore);
 
     }
 
@@ -95,6 +98,17 @@ public class StoreServiceImpl implements StoreService {
         if(currentUser==null){
             throw new UserException("You don't have access to this store");
         }
-        return StoreMapper.toDTO(currentUser.getStore());
+        return toDTO(currentUser.getStore());
+    }
+
+    @Override
+    public StoreDTO moderateStore(Long id, StoreStatus status) throws Exception {
+        Store store = storeRepository.findById(id).orElseThrow(
+                ()-> new Exception("Store not found...")
+        );
+
+        store.setStatus(status);
+        Store updatedStore=storeRepository.save(store);
+        return StoreMapper.toDTO(updatedStore);
     }
 }
