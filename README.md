@@ -226,4 +226,4 @@ Autenticação via JWT — o token deve ser enviado no header `Authorization: Be
 
 ## 👨‍💻 Autor
 
-Renato Belarmino
+Renato de Paiva Belarmino
