@@ -52,6 +52,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         User currentUser = userService.getCurrentUser();
+        assertCanAssignRole(currentUser, request.getRole());
         Store store = resolveStore(currentUser, request.getStoreId());
 
         User employee = new User();
@@ -74,19 +75,30 @@ public class EmployeeServiceImpl implements EmployeeService {
         User employee = userRepository.findById(id)
                 .orElseThrow(() -> new Exception("Employee not found"));
 
+        User currentUser = userService.getCurrentUser();
+
         employee.setFullName(request.getFullName());
         employee.setPhone(request.getPhone());
 
         if (request.getRole() != null) {
+            assertCanAssignRole(currentUser, request.getRole());
             employee.setRole(request.getRole());
         }
 
-        User currentUser = userService.getCurrentUser();
         if (currentUser.getRole() == UserRole.ROLE_ADMIN && request.getStoreId() != null) {
             employee.setStore(resolveStore(currentUser, request.getStoreId()));
         }
 
         return UserMapper.toDTO(userRepository.save(employee));
+    }
+
+    private void assertCanAssignRole(User currentUser, UserRole targetRole) throws Exception {
+        boolean isPrivilegedRole = targetRole == UserRole.ROLE_ADMIN
+                || targetRole == UserRole.ROLE_STORE_ADMIN;
+
+        if (isPrivilegedRole && currentUser.getRole() != UserRole.ROLE_ADMIN) {
+            throw new Exception("Only a network administrator can assign this role");
+        }
     }
 
     private Store resolveStore(User currentUser, Long storeId) throws Exception {

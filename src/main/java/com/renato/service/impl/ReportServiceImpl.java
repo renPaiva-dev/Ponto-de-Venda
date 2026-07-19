@@ -2,6 +2,8 @@ package com.renato.service.impl;
 
 import com.renato.domain.OrderStatus;
 import com.renato.domain.PaymentMethod;
+import com.renato.domain.UserRole;
+import com.renato.exceptons.UserException;
 import com.renato.model.Order;
 import com.renato.model.Store;
 import com.renato.model.User;
@@ -33,10 +35,15 @@ public class ReportServiceImpl implements ReportService {
     private final UserService userService;
 
     @Override
-    public SalesSummaryDTO getSalesSummary(LocalDateTime startDate, LocalDateTime endDate) {
+    public SalesSummaryDTO getSalesSummary(LocalDateTime startDate, LocalDateTime endDate) throws UserException {
 
-        List<Order> orders = orderRepository.findByCreatedAtBetween(startDate, endDate)
-                .stream()
+        User currentUser = userService.getCurrentUser();
+        List<Order> rawOrders = currentUser.getRole() == UserRole.ROLE_ADMIN
+                ? orderRepository.findByCreatedAtBetween(startDate, endDate)
+                : orderRepository.findByStoreIdAndCreatedAtBetween(
+                        currentUser.getStore().getId(), startDate, endDate);
+
+        List<Order> orders = rawOrders.stream()
                 .filter(order -> order.getStatus() != OrderStatus.CANCELLED)
                 .collect(Collectors.toList());
 
