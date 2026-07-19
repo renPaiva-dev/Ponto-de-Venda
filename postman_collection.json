@@ -1,0 +1,348 @@
+{
+  "info": {
+    "name": "Renato POS System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" },
+    { "key": "storeId", "value": "1" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "productId", "value": "1" },
+    { "key": "orderId", "value": "1" },
+    { "key": "paymentId", "value": "1" },
+    { "key": "refundId", "value": "1" },
+    { "key": "employeeId", "value": "1" },
+    { "key": "clientId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "url": "{{baseUrl}}/auth/signup",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Renato Admin\",\n  \"email\": \"admin@teste.com\",\n  \"password\": \"123456\",\n  \"role\": \"ROLE_STORE_ADMIN\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jwt = pm.response.json().jwt;",
+                  "  pm.collectionVariables.set('token', jwt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "noauth" },
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@teste.com\",\n  \"password\": \"123456\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const jwt = pm.response.json().jwt;",
+                  "  pm.collectionVariables.set('token', jwt);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        { "name": "Meu perfil", "request": { "method": "GET", "url": "{{baseUrl}}/api/users/profile" } },
+        { "name": "Usuario por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/users/{{employeeId}}" } }
+      ]
+    },
+    {
+      "name": "Lojas",
+      "item": [
+        {
+          "name": "Criar loja",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/stores",
+            "body": { "mode": "raw", "raw": "{\n  \"brand\": \"Loja Centro\"\n}" }
+          }
+        },
+        { "name": "Listar lojas", "request": { "method": "GET", "url": "{{baseUrl}}/api/stores" } },
+        { "name": "Minha loja (admin)", "request": { "method": "GET", "url": "{{baseUrl}}/api/stores/admin" } },
+        { "name": "Minha loja (funcionario)", "request": { "method": "GET", "url": "{{baseUrl}}/api/stores/employee" } },
+        { "name": "Loja por ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/stores/{{storeId}}" } },
+        {
+          "name": "Atualizar loja",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/stores/{{storeId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"brand\": \"Loja Centro Atualizada\",\n  \"description\": \"Nova descricao\"\n}" }
+          }
+        },
+        {
+          "name": "Moderar loja (ADMIN)",
+          "request": { "method": "PUT", "url": "{{baseUrl}}/api/stores/{{storeId}}/moderate?status=ACTIVE" }
+        },
+        { "name": "Excluir loja", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/stores/{{storeId}}" } }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Criar categoria",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/produtos/categorias",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Bebidas\",\n  \"description\": \"Bebidas em geral\"\n}" }
+          }
+        },
+        { "name": "Listar categorias", "request": { "method": "GET", "url": "{{baseUrl}}/produtos/categorias" } }
+      ]
+    },
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Criar produto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/produtos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Refrigerante\",\n  \"price\": 5.50,\n  \"stockQuantity\": 100,\n  \"minStockQuantity\": 10,\n  \"category\": { \"id\": {{categoryId}} }\n}"
+            }
+          }
+        },
+        { "name": "Listar produtos", "request": { "method": "GET", "url": "{{baseUrl}}/produtos" } },
+        { "name": "Produto por ID", "request": { "method": "GET", "url": "{{baseUrl}}/produtos/{{productId}}" } },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/produtos/{{productId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Refrigerante 2L\",\n  \"price\": 7.90,\n  \"category\": { \"id\": {{categoryId}} }\n}"
+            }
+          }
+        },
+        { "name": "Excluir produto", "request": { "method": "DELETE", "url": "{{baseUrl}}/produtos/{{productId}}" } }
+      ]
+    },
+    {
+      "name": "Estoque",
+      "item": [
+        { "name": "Alertas de estoque baixo", "request": { "method": "GET", "url": "{{baseUrl}}/estoque/alertas" } },
+        {
+          "name": "Atualizar estoque",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/estoque/{{productId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"quantityChange\": -5,\n  \"reason\": \"venda balcao\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Criar cliente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/clientes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cliente Teste\",\n  \"email\": \"cliente@teste.com\",\n  \"phone\": \"11999999999\"\n}"
+            }
+          }
+        },
+        { "name": "Listar clientes", "request": { "method": "GET", "url": "{{baseUrl}}/clientes" } }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Criar pedido",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pedidos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"CASH\",\n  \"clientId\": null,\n  \"items\": [\n    { \"productId\": {{productId}}, \"quantity\": 2, \"discount\": 0 }\n  ]\n}"
+            }
+          }
+        },
+        { "name": "Listar pedidos", "request": { "method": "GET", "url": "{{baseUrl}}/pedidos" } },
+        { "name": "Pedido por ID", "request": { "method": "GET", "url": "{{baseUrl}}/pedidos/{{orderId}}" } },
+        {
+          "name": "Atualizar status do pedido",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pedidos/{{orderId}}/status",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"PAID\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pagamentos",
+      "item": [
+        {
+          "name": "Pagar com Stripe",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pagamentos/stripe",
+            "body": { "mode": "raw", "raw": "{\n  \"orderId\": {{orderId}}\n}" }
+          }
+        },
+        {
+          "name": "Pagar com Razorpay",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/pagamentos/razorpay",
+            "body": { "mode": "raw", "raw": "{\n  \"orderId\": {{orderId}}\n}" }
+          }
+        },
+        {
+          "name": "Webhook (simulado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Stripe-Signature", "value": "t=123,v1=fake" }
+            ],
+            "auth": { "type": "noauth" },
+            "url": "{{baseUrl}}/pagamentos/webhook",
+            "body": { "mode": "raw", "raw": "{\n  \"id\": \"evt_teste\",\n  \"type\": \"payment_intent.succeeded\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reembolsos",
+      "item": [
+        {
+          "name": "Solicitar reembolso",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/reembolsos",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": {{orderId}},\n  \"amount\": 11.00,\n  \"reason\": \"cliente desistiu\"\n}"
+            }
+          }
+        },
+        { "name": "Consultar reembolso", "request": { "method": "GET", "url": "{{baseUrl}}/reembolsos/{{refundId}}" } }
+      ]
+    },
+    {
+      "name": "Relatorios",
+      "item": [
+        {
+          "name": "Vendas por periodo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/vendas?startDate=2026-01-01T00:00:00&endDate=2026-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["relatorios", "vendas"],
+              "query": [
+                { "key": "startDate", "value": "2026-01-01T00:00:00" },
+                { "key": "endDate", "value": "2026-12-31T23:59:59" }
+              ]
+            }
+          }
+        },
+        { "name": "Metricas por filial", "request": { "method": "GET", "url": "{{baseUrl}}/relatorios/filial/{{storeId}}" } },
+        {
+          "name": "Relatorio de turno",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/relatorios/turno?cashierId={{employeeId}}&date=2026-07-19",
+              "host": ["{{baseUrl}}"],
+              "path": ["relatorios", "turno"],
+              "query": [
+                { "key": "cashierId", "value": "{{employeeId}}" },
+                { "key": "date", "value": "2026-07-19" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Funcionarios",
+      "item": [
+        {
+          "name": "Criar funcionario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/funcionarios",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Caixa Um\",\n  \"email\": \"caixa1@teste.com\",\n  \"password\": \"123456\",\n  \"role\": \"ROLE_CASHIER\"\n}"
+            }
+          }
+        },
+        { "name": "Listar funcionarios", "request": { "method": "GET", "url": "{{baseUrl}}/funcionarios" } },
+        {
+          "name": "Atualizar funcionario",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/funcionarios/{{employeeId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Caixa Um Editado\",\n  \"role\": \"ROLE_CASHIER\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

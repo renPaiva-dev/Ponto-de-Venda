@@ -4,6 +4,7 @@ package com.renato.configuration;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,14 @@ import java.util.Set;
 @Service
 public class JwtProvider {
 
+    private final SecretKey key;
+    private final long expirationMs;
 
-    static SecretKey key = Keys.hmacShaKeyFor(JwtConstant.JWT_SECRET.getBytes());
+    public JwtProvider(@Value("${jwt.secret}") String jwtSecret,
+                        @Value("${jwt.expiration}") long expirationMs) {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        this.expirationMs = expirationMs;
+    }
 
     public String generateToken(Authentication authentication) {
 
@@ -30,7 +37,7 @@ public class JwtProvider {
 
         return Jwts.builder()
                 .issuedAt(new Date())
-                .expiration(new Date(new Date().getTime()+86400000))
+                .expiration(new Date(new Date().getTime() + expirationMs))
                 .claim("email", authentication.getName())
                 .claim("authorities", roles)
                 .signWith(key)

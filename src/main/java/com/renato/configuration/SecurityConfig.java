@@ -2,8 +2,10 @@ package com.renato.configuration;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,7 +20,11 @@ import java.util.Arrays;
 import java.util.Collections;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -26,11 +32,12 @@ public class SecurityConfig {
         return http
                 .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(Authorize->
-                        Authorize.requestMatchers("/api/**").authenticated()
-                                .requestMatchers("/api/super-admin/**")
-                                .hasRole("ADMIN")
-                                .anyRequest().permitAll()
-                ).addFilterBefore(new JwtValidator(),
+                        Authorize.requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/pagamentos/webhook").permitAll()
+                                .requestMatchers("/error").permitAll()
+                                .requestMatchers("/api/super-admin/**").hasRole("ADMIN")
+                                .anyRequest().authenticated()
+                ).addFilterBefore(new JwtValidator(jwtSecret),
                         BasicAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(

@@ -8,9 +8,11 @@ import com.renato.model.StoreContact;
 import com.renato.model.User;
 import com.renato.payload.dto.StoreDTO;
 import com.renato.repository.StoreRepository;
+import com.renato.repository.UserRepository;
 import com.renato.service.StoreService;
 import com.renato.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,13 +26,18 @@ import static com.renato.mapper.StoreMapper.toDTO;
 public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public StoreDTO createStore(StoreDTO storeDTO, User user) {
 
         Store store = StoreMapper.toEntity(storeDTO, user);
+        Store savedStore = storeRepository.save(store);
 
-        return toDTO(storeRepository.save(store));
+        user.setStore(savedStore);
+        userRepository.save(user);
+
+        return toDTO(savedStore);
     }
 
 
@@ -102,6 +109,7 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public StoreDTO moderateStore(Long id, StoreStatus status) throws Exception {
         Store store = storeRepository.findById(id).orElseThrow(
                 ()-> new Exception("Store not found...")

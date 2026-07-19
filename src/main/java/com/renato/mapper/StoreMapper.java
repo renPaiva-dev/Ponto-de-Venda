@@ -8,6 +8,10 @@ public class StoreMapper {
 
     public static StoreDTO toDTO(Store store){
 
+        if (store == null) {
+            return null;
+        }
+
         StoreDTO storeDTO = new StoreDTO();
         storeDTO.setId(store.getId());
         storeDTO.setBrand(store.getBrand());

@@ -22,6 +22,8 @@ public class StoreController {
 
     private final StoreService storeService;
     private final UserService userService;
+
+    @PostMapping
     public ResponseEntity<StoreDTO> createStore(@RequestBody StoreDTO storeDTO,
 
                                                 @RequestHeader("Authorization") String jwt) throws UserException {
@@ -83,6 +85,14 @@ public class StoreController {
 
         return ResponseEntity.ok(storeService.getStoreById(id));
 
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StoreDTO> updateStore(
+            @PathVariable Long id,
+            @RequestBody StoreDTO storeDTO) throws Exception {
+
+        return ResponseEntity.ok(storeService.updateStore(id, storeDTO));
     }
 
     }

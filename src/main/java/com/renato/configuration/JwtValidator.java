@@ -22,6 +22,12 @@ import java.util.List;
 
 public class JwtValidator extends OncePerRequestFilter {
 
+    private final SecretKey key;
+
+    public JwtValidator(String jwtSecret) {
+        this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+    }
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -37,7 +43,6 @@ public class JwtValidator extends OncePerRequestFilter {
 
           try{
 
-              SecretKey key = Keys.hmacShaKeyFor(JwtConstant.JWT_SECRET.getBytes());
               Claims claims = Jwts.parser()
                       .verifyWith(key)
                       .build()
